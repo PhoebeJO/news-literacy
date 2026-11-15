@@ -1,0 +1,14 @@
+# Render Blueprint：在 Render 選 New → Blueprint，連結這個 repo 就會照這份設定部署。
+services:
+  - type: web
+    name: news-literacy-demo
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /api/health
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.9
+      - key: LLM_PROVIDER      # 雲端沒有 Ollama，用規則版；之後有 Gemini 金鑰再到 Render 後台加 GEMINI_API_KEY 並刪掉這一項
+        value: none

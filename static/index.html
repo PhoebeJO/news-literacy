@@ -1,0 +1,335 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>新聞素養助手 Demo</title>
+<style>
+:root{--bg:#eef1f4;--panel:#fff;--ink:#1c2430;--muted:#66717f;--line:#dde2e8;--accent:#0b6e5f;
+  --accent-soft:#e2f3ef;--user:#0b6e5f;--other:#8a4b08;--other-soft:#fdf1df;--bar:#3f8f82;--warn:#a43b2f}
+@media (prefers-color-scheme:dark){:root{--bg:#12161b;--panel:#1b2129;--ink:#e6eaef;--muted:#98a3b0;
+  --line:#2c3540;--accent:#4fc3b0;--accent-soft:#17352f;--user:#1f7f70;--other:#f0b566;--other-soft:#3a2c14;--bar:#4fc3b0;--warn:#f08a7d}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.6 "Noto Sans TC","Microsoft JhengHei",system-ui,sans-serif}
+a{color:var(--accent)}
+header{position:sticky;top:0;z-index:5;background:var(--panel);border-bottom:1px solid var(--line);
+  display:flex;align-items:center;gap:12px;padding:10px 16px;flex-wrap:wrap}
+header h1{font-size:17px;margin:0;flex:1;min-width:160px}
+header h1 small{font-weight:400;color:var(--muted);font-size:12px;margin-left:6px}
+.tabs button,.btn{border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:999px;
+  padding:6px 14px;font:inherit;font-size:14px;cursor:pointer}
+.tabs button.on{background:var(--accent);border-color:var(--accent);color:#fff}
+@media (prefers-color-scheme:dark){.tabs button.on{color:#06231e}}
+main{max-width:860px;margin:0 auto;padding:16px 16px 150px}
+.msg{display:flex;margin:10px 0}
+.msg.user{justify-content:flex-end}
+.bubble{max-width:100%;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:10px 14px;white-space:pre-wrap;overflow-wrap:anywhere}
+.msg.user .bubble{background:var(--user);border-color:var(--user);color:#fff;max-width:80%}
+.block{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px;margin:10px 0}
+.cards{display:flex;gap:10px;overflow-x:auto;padding:4px 2px 10px;margin:6px 0;scroll-snap-type:x proximity}
+.card{flex:0 0 268px;scroll-snap-align:start;background:var(--panel);border:1px solid var(--line);border-radius:14px;
+  padding:12px;display:flex;flex-direction:column;gap:6px}
+.card.other{border-color:var(--other);background:var(--other-soft)}
+.meta{font-size:12px;color:var(--muted);display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.chip{background:var(--accent-soft);color:var(--accent);border-radius:999px;padding:1px 9px;font-size:12px;white-space:nowrap}
+.card.other .chip.ov{background:var(--other);color:#fff}
+.card a.title{font-weight:600;text-decoration:none;color:var(--ink);line-height:1.45}
+.card a.title:hover{text-decoration:underline}
+.sum{font-size:13px;color:var(--muted);display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.reason{font-size:13px;border-left:3px solid var(--accent);padding-left:8px;margin-top:auto}
+.card.other .reason{border-color:var(--other)}
+.acts{display:flex;gap:6px;margin-top:4px}
+.acts button{flex:1;border:1px solid var(--line);background:transparent;color:var(--ink);border-radius:8px;padding:5px 4px;font:inherit;font-size:13px;cursor:pointer}
+.acts button:disabled{opacity:.45;cursor:default}
+details.trace{font-size:12px;color:var(--muted);margin:2px 4px 14px}
+details.trace summary{cursor:pointer}
+details.trace ol{margin:6px 0 0;padding-left:20px}
+h3{font-size:15px;margin:0 0 8px}
+h4{font-size:13px;margin:14px 0 6px;color:var(--muted);font-weight:600}
+.big{font-size:34px;font-weight:700;line-height:1.1}
+.meter{height:10px;border-radius:5px;background:var(--line);overflow:hidden;margin:6px 0 2px}
+.meter i{display:block;height:100%;background:var(--bar)}
+.row{display:grid;grid-template-columns:96px 1fr 62px;gap:8px;align-items:center;font-size:13px;margin:4px 0}
+.row .track{height:12px;background:var(--line);border-radius:3px;overflow:hidden}
+.row .track i{display:block;height:100%;background:var(--bar)}
+.row span:last-child{text-align:right;color:var(--muted);font-variant-numeric:tabular-nums}
+.note{font-size:12px;color:var(--muted);margin-top:8px}
+.warn{color:var(--warn)}
+.sbs{border-top:1px solid var(--line);padding:10px 0}
+.sbs:first-of-type{border-top:0}
+.tl{font-size:13px;margin:3px 0;display:grid;grid-template-columns:86px 92px 1fr;gap:6px}
+.tl span:first-child{color:var(--muted);font-variant-numeric:tabular-nums}
+footer{position:fixed;left:0;right:0;bottom:0;background:var(--panel);border-top:1px solid var(--line);padding:8px 16px 12px}
+.inner{max-width:860px;margin:0 auto}
+.quick{display:flex;gap:6px;overflow-x:auto;padding-bottom:8px}
+.quick button{white-space:nowrap}
+form{display:flex;gap:8px}
+textarea{flex:1;resize:none;height:44px;border:1px solid var(--line);border-radius:12px;padding:10px 12px;font:inherit;background:var(--bg);color:var(--ink)}
+form button{border:0;background:var(--accent);color:#fff;border-radius:12px;padding:0 20px;font:inherit;cursor:pointer}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.tile{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px}
+.tile b{display:block;font-size:24px}
+.tile span{font-size:12px;color:var(--muted)}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--muted);font-weight:600}
+td.num{text-align:right;font-variant-numeric:tabular-nums}
+.scroll{overflow-x:auto}
+.topicpick{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+.topicpick button.on{background:var(--accent);border-color:var(--accent);color:#fff}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<header>
+  <h1>新聞素養助手<small>Demo</small></h1>
+  <div class="tabs">
+    <button id="tab-chat" class="on">對話</button>
+    <button id="tab-dash">儀表板</button>
+  </div>
+  <button class="btn" id="refresh">重新抓取新聞</button>
+</header>
+
+<main id="chat"></main>
+<main id="dash" hidden></main>
+
+<footer id="composer">
+  <div class="inner">
+    <div class="quick" id="quick"></div>
+    <form id="form">
+      <textarea id="input" placeholder="輸入議題、貼上想查證的訊息，或問一個識讀名詞…" aria-label="訊息"></textarea>
+      <button type="submit">送出</button>
+    </form>
+  </div>
+</footer>
+
+<script>
+const $ = id => document.getElementById(id);
+function h(tag, attrs, ...kids) {
+  const el = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs || {})) {
+    if (k === 'class') el.className = v;
+    else if (k.startsWith('on')) el.addEventListener(k.slice(2), v);
+    else if (v !== false && v != null) el.setAttribute(k, v);
+  }
+  for (const kid of kids.flat()) if (kid != null && kid !== false) el.append(kid.nodeType ? kid : String(kid));
+  return el;
+}
+function getUid() {
+  let id = null;
+  try { id = localStorage.getItem('nl_uid'); } catch (e) {}
+  if (!id) {
+    id = (crypto.randomUUID ? crypto.randomUUID() : 'u' + Date.now() + Math.random().toString(16).slice(2));
+    try { localStorage.setItem('nl_uid', id); } catch (e) {}
+  }
+  return id;
+}
+const uid = getUid();
+const chat = $('chat');
+const scrollDown = () => window.scrollTo({top: document.body.scrollHeight, behavior: 'smooth'});
+
+async function api(path, body) {
+  const r = await fetch(path, {method: body ? 'POST' : 'GET', headers: {'Content-Type': 'application/json'},
+                               body: body ? JSON.stringify(body) : undefined});
+  if (!r.ok) throw new Error('HTTP ' + r.status);
+  return r.json();
+}
+
+function bar(name, pct, label) {
+  return h('div', {class: 'row'}, h('span', {}, name),
+           h('div', {class: 'track'}, h('i', {style: `width:${Math.max(0, Math.min(100, pct))}%`})),
+           h('span', {}, label));
+}
+
+function cardEl(c, withActions = true) {
+  const acts = withActions && h('div', {class: 'acts'},
+    ...[['like', '👍'], ['dislike', '👎'], ['other_view', '換個觀點']].map(([a, label]) =>
+      h('button', {onclick: async ev => {
+        ev.target.disabled = true;
+        try { render(await api('/api/postback', {uid, article_id: c.article_id, action: a})); }
+        catch (e) { addText('連線失敗：' + e.message); ev.target.disabled = false; }
+      }}, label)));
+  return h('div', {class: 'card' + (c.other_view ? ' other' : '')},
+    h('div', {class: 'meta'}, c.other_view && h('span', {class: 'chip ov'}, '另一觀點'),
+      h('span', {class: 'chip'}, c.source), c.country, c.topic && '・' + c.topic, '・' + c.time),
+    h('a', {class: 'title', href: c.url, target: '_blank', rel: 'noopener'}, c.title),
+    c.summary && h('div', {class: 'sum'}, c.summary),
+    c.reason && h('div', {class: 'reason'}, '為什麼推這則：' + c.reason +
+                  (c.score != null ? `（相關度 ${c.score}）` : '')),
+    acts);
+}
+
+function reportEl(r) {
+  const el = h('div', {class: 'block'},
+    h('h3', {}, '你這週的新聞飲食報告'),
+    h('div', {}, `近 7 天讀了 ${r.total} 則新聞，${r.top_source_pct}% 來自${r.top_source}，外媒占 ${r.foreign_pct}%。`),
+    h('h4', {}, `來源多樣性（0 = 只讀一家，1 = ${r.n_sources} 家讀得一樣多）`),
+    h('div', {class: 'big'}, r.diversity.toFixed(2)),
+    h('div', {class: 'meter'}, h('i', {style: `width:${r.diversity * 100}%`})),
+    h('h4', {}, '各媒體占比'),
+    ...r.sources.map(s => bar(s.name, s.pct, `${s.count} 則`)),
+    h('h4', {}, '領域分佈'),
+    ...r.topics.map(t => bar(t.name, t.pct, `${t.count} 則`)),
+    r.unread_sources.length ? h('div', {class: 'note'}, '這週還沒讀過：' + r.unread_sources.join('、')) : null,
+    r.suggestion && h('h4', {}, '要不要看看另一家怎麼報？'),
+    r.suggestion && cardEl(r.suggestion, false),
+    h('div', {class: 'note'}, '多樣性 = 正規化 Shannon entropy：H = −Σ pᵢ·log(pᵢ) / log(N)。這份報告只呈現你的閱讀分佈，不評價任何媒體。'),
+    r.simulated ? h('div', {class: 'note warn'}, `⚠ 其中含 ${r.simulated} 筆「示範紀錄」模擬資料。`) : null);
+  return el;
+}
+
+function compareEl(d) {
+  if (!d.same_event) return h('div', {class: 'block'},
+    h('h3', {}, `「${d.topic}」的相關報導`),
+    h('div', {class: 'note warn'}, '資料庫裡沒有被兩家以上媒體報導的同一事件，無法對照。以下是相關報導，未必是同一件事。'),
+    h('div', {class: 'cards'}, ...d.cards.map(c => cardEl(c))));
+  return h('div', {class: 'block'},
+    h('h3', {}, `「${d.topic}」：${d.n_sources} 家媒體報導同一事件（${d.countries.join('、')}）`),
+    !d.enough && h('div', {class: 'note warn'}, `只有 ${d.n_sources} 家，資料不足以完整對照（門檻 3 家），以下僅供參考。`),
+    h('h4', {}, '各家報導並排'),
+    ...d.side_by_side.map(c => h('div', {class: 'sbs'},
+      h('div', {class: 'meta'}, h('span', {class: 'chip'}, c.source), c.country, '・' + c.time),
+      h('a', {class: 'title', href: c.url, target: '_blank', rel: 'noopener', style: 'font-weight:600;text-decoration:none;color:inherit'}, c.title),
+      h('div', {class: 'sum'}, c.summary))),
+    d.llm ? h('h4', {}, `LLM 比對（${d.llm_label || 'LLM'}，只根據上面的標題與摘要，可能有誤）`) : null,
+    d.llm ? h('div', {style: 'white-space:pre-wrap'}, d.llm) : null,
+    d.shared_terms.length ? h('h4', {}, '多家都出現的詞（字串比對，不是 LLM 判讀）') : null,
+    d.shared_terms.length ? h('div', {class: 'meta'}, ...d.shared_terms.map(t => h('span', {class: 'chip'}, t))) : null,
+    h('h4', {}, '事件時間軸（誰先報、後續怎麼發展）'),
+    ...d.timeline.map(c => h('div', {class: 'tl'}, h('span', {}, c.time), h('span', {}, c.source),
+      h('a', {href: c.url, target: '_blank', rel: 'noopener'}, c.title))),
+    h('div', {class: 'note'}, `資料抓取時間 ${d.fetched_at}（台灣時間），只根據 RSS 標題與摘要。我不判斷哪家中立或偏頗，請自行比較。`));
+}
+
+function factEl(d) {
+  const kids = [h('h3', {}, '訊息查證（Cofacts）'), h('div', {}, '查詢的關鍵句：「' + d.claim + '」')];
+  if (d.error) kids.push(h('div', {class: 'note warn'}, d.error));
+  else if (!d.total) kids.push(h('div', {style: 'margin-top:8px'},
+    'Cofacts 查無相似訊息。查不到不代表這則訊息是真的或假的，建議到下列管道查證：'));
+  else {
+    kids.push(h('div', {class: 'note'}, `找到 ${d.total} 筆相似訊息，以下是最相近的 ${d.matches.length} 筆。請自行比對是不是同一則；我不會自己判定真假。`));
+    for (const m of d.matches) kids.push(h('div', {class: 'sbs'},
+      h('div', {class: 'meta'}, ...(m.labels.length ? m.labels.map(l => h('span', {class: 'chip'}, l)) : ['尚無查核回應'])),
+      h('div', {class: 'sum'}, '訊息：' + m.text),
+      m.reply && h('div', {class: 'sum'}, '查核回應：' + m.reply),
+      h('a', {href: m.url, target: '_blank', rel: 'noopener'}, '在 Cofacts 上看完整內容')));
+  }
+  if (d.channels) kids.push(h('h4', {}, '其他查證管道'),
+    h('div', {class: 'meta'}, ...d.channels.map(c => h('a', {href: c.url, target: '_blank', rel: 'noopener'}, c.name))));
+  return h('div', {class: 'block'}, ...kids);
+}
+
+function topicsEl(m) {
+  const picked = new Set(m.chosen);
+  return h('div', {class: 'block'}, h('h3', {}, '選你關注的領域（建議 3 個）'),
+    h('div', {class: 'topicpick'}, ...m.topics.map(t => h('button', {class: 'btn' + (picked.has(t) ? ' on' : ''),
+      onclick: ev => { picked.has(t) ? picked.delete(t) : picked.add(t); ev.target.classList.toggle('on'); }}, t))),
+    h('button', {class: 'btn', onclick: () => picked.size && send('領域：' + [...picked].join('、'))}, '確定'));
+}
+
+function addText(text, who = 'bot') {
+  chat.append(h('div', {class: 'msg ' + who}, h('div', {class: 'bubble'}, text)));
+  scrollDown();
+}
+
+function render(res) {
+  for (const m of res.messages || []) {
+    if (m.type === 'text') addText(m.text);
+    else if (m.type === 'cards') chat.append(h('div', {class: 'cards'}, ...m.cards.map(c => cardEl(c))));
+    else if (m.type === 'report') chat.append(reportEl(m.report));
+    else if (m.type === 'compare') chat.append(compareEl(m.data));
+    else if (m.type === 'factcheck') chat.append(factEl(m.data));
+    else if (m.type === 'kb') chat.append(h('div', {class: 'block'}, h('h3', {}, m.name), h('div', {}, m.text),
+      h('div', {class: 'note'}, `引用：媒體識讀指南〈${m.name}〉`)));
+    else if (m.type === 'topics') chat.append(topicsEl(m));
+  }
+  if (res.trace && res.trace.length) chat.append(h('details', {class: 'trace'},
+    h('summary', {}, `流程追蹤（${res.trace.length} 步）` + (res.intent ? `・意圖 ${res.intent} ${res.intent_name}` : '')),
+    h('ol', {}, ...res.trace.map(t => h('li', {}, t)))));
+  if (res.quick) setQuick(res.quick);
+  scrollDown();
+}
+
+function setQuick(items) {
+  $('quick').replaceChildren(...items.map(t => h('button', {class: 'btn', type: 'button', onclick: () => send(t)}, t)));
+}
+
+async function send(text) {
+  text = text.trim();
+  if (!text) return;
+  addText(text, 'user');
+  const wait = h('div', {class: 'msg bot'}, h('div', {class: 'bubble', style: 'color:var(--muted)'}, '處理中…（用本機 LLM 時可能要等幾十秒）'));
+  chat.append(wait); scrollDown();
+  try { const res = await api('/api/chat', {uid, text}); wait.remove(); render(res); }
+  catch (e) { wait.remove(); addText('連線失敗：' + e.message + '（伺服器還在執行嗎？）'); }
+}
+
+$('form').addEventListener('submit', ev => { ev.preventDefault(); const v = $('input').value; $('input').value = ''; send(v); });
+$('input').addEventListener('keydown', ev => {
+  if (ev.key === 'Enter' && !ev.shiftKey && !ev.isComposing) { ev.preventDefault(); $('form').requestSubmit(); }
+});
+
+// ---------- 儀表板 ----------
+const pct = (a, b) => b ? Math.round(100 * a / b) + '%' : '—';
+async function loadDash() {
+  const d = $('dash');
+  let s;
+  try { s = await api('/api/stats'); } catch (e) { d.replaceChildren(h('div', {class: 'block'}, '讀取失敗：' + e.message)); return; }
+  const ri = s.recommendations.interest || {sent: 0, clicked: 0}, ro = s.recommendations.other_view || {sent: 0, clicked: 0};
+  const maxN = Math.max(1, ...s.articles_per_source.map(x => x.count));
+  d.replaceChildren(
+    h('div', {class: 'tiles'},
+      ...[[s.articles_total, '資料庫新聞則數'], [s.events_total, '72 小時內事件數'], [s.events_multi, '兩家以上報導的事件'],
+          [s.users, '使用者數'], [pct(ri.clicked, ri.sent), `興趣推薦點擊率（${ri.clicked}/${ri.sent}）`],
+          [pct(ro.clicked, ro.sent), `「另一觀點」點擊率（${ro.clicked}/${ro.sent}）`],
+          [pct(s.likes, s.likes + s.dislikes), `👍 率（${s.likes}/${s.likes + s.dislikes}）`]]
+        .map(([v, label]) => h('div', {class: 'tile'}, h('b', {}, v), h('span', {}, label)))),
+    h('div', {class: 'note'}, `最近一次抓取：${s.latest_fetch || '尚未抓取'}` + (s.refreshing ? '・正在抓取中…' : '') +
+      `・LLM：${s.llm_enabled ? s.llm_label : '未設定，使用規則版'}` +
+      `・真實點擊 ${s.clicks_real} 筆、示範模擬 ${s.clicks_simulated} 筆（點擊率不含模擬資料）`),
+    h('div', {class: 'block'}, h('h3', {}, '媒體白名單與新聞則數'),
+      h('div', {class: 'scroll'}, h('table', {}, h('tr', {}, h('th', {}, '媒體'), h('th', {}, '國家'), h('th', {}, '所有權（可查證事實）'), h('th', {}, '則數')),
+        ...s.articles_per_source.map(x => h('tr', {}, h('td', {}, x.name), h('td', {}, x.country), h('td', {}, x.ownership),
+          h('td', {class: 'num'}, x.count)))))),
+    h('div', {class: 'block'}, h('h3', {}, '多家媒體共同報導的事件（事件分群結果）'),
+      s.top_events.length ? h('div', {class: 'scroll'}, h('table', {}, h('tr', {}, h('th', {}, '事件（最早一則的標題）'), h('th', {}, '媒體'), h('th', {}, '則數')),
+        ...s.top_events.map(e => h('tr', {}, h('td', {}, e.label), h('td', {}, (e.sources || '').replaceAll(',', '、')),
+          h('td', {class: 'num'}, e.n_articles))))) : '還沒有資料'),
+    h('div', {class: 'block'}, h('h3', {}, '意圖分佈（query_log）'),
+      s.intents.length ? s.intents.map(i => bar(i.intent, 100 * i.n / Math.max(...s.intents.map(x => x.n)), i.n + ' 次')) : '還沒有對話紀錄'),
+    h('div', {class: 'block'}, h('h3', {}, '查核紀錄（fact_checks）'),
+      s.fact_checks.length ? h('table', {}, h('tr', {}, h('th', {}, 'Cofacts 分類'), h('th', {}, '次數')),
+        ...s.fact_checks.map(f => h('tr', {}, h('td', {}, f.category), h('td', {class: 'num'}, f.n)))) : '還沒有查證紀錄'),
+    h('div', {class: 'block'}, h('h3', {}, 'LLM 用量（llm_usage）'),
+      s.llm_usage.length ? h('table', {}, h('tr', {}, h('th', {}, '用途'), h('th', {}, '呼叫'), h('th', {}, '輸入 token'), h('th', {}, '輸出 token')),
+        ...s.llm_usage.map(u => h('tr', {}, h('td', {}, u.purpose), h('td', {class: 'num'}, u.calls), h('td', {class: 'num'}, u.tokens_in ?? '—'),
+          h('td', {class: 'num'}, u.tokens_out ?? '—')))) : '目前是規則版，沒有呼叫 LLM（0 token）。'),
+    h('div', {class: 'note'}, '樣本只有本機測試的使用者，數字只用來示範「系統能量測」，不能當成效結論。'));
+}
+
+function showTab(name) {
+  $('chat').hidden = name !== 'chat'; $('composer').hidden = name !== 'chat'; $('dash').hidden = name !== 'dash';
+  $('tab-chat').classList.toggle('on', name === 'chat'); $('tab-dash').classList.toggle('on', name === 'dash');
+  if (name === 'dash') loadDash();
+}
+$('tab-chat').onclick = () => showTab('chat');
+$('tab-dash').onclick = () => showTab('dash');
+$('refresh').onclick = async () => {
+  $('refresh').disabled = true; $('refresh').textContent = '抓取中…';
+  try {
+    const r = await api('/api/refresh', {});
+    if (r.status === 'too_soon') addText('10 分鐘內剛更新過，新聞已經是最新的。');
+    else {
+      for (let i = 0; i < 60; i++) { await new Promise(r => setTimeout(r, 2000)); if (!(await api('/api/stats')).refreshing) break; }
+      addText('新聞已更新。');
+    }
+    if (!$('dash').hidden) loadDash();
+  } catch (e) { addText('更新失敗：' + e.message); }
+  $('refresh').disabled = false; $('refresh').textContent = '重新抓取新聞';
+};
+
+addText('你好，我是新聞素養助手（Demo）。我會推薦你感興趣的新聞，同時讓你看到不同媒體的觀點，並告訴你自己的新聞飲食偏在哪裡。\n可以先按下面的按鈕試試。');
+setQuick(['推薦新聞', '我的新聞報告', '選領域', '什麼是同溫層？', '載入示範紀錄']);
+</script>
+</body>
+</html>
