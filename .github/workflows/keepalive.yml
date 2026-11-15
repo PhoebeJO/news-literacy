@@ -1,0 +1,18 @@
+# 每 10 分鐘打一次線上版，避免 Render 免費方案在閒置 15 分鐘後休眠。
+# 注意：repo 連續 60 天沒有任何提交時，GitHub 會自動停用排程，要到 Actions 頁面重新啟用。
+name: keepalive
+
+on:
+  schedule:
+    - cron: "*/10 * * * *"
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Ping health endpoint
+        run: curl -fsS --retry 6 --retry-delay 20 --retry-all-errors --max-time 60 https://news-literacy-demo.onrender.com/api/health

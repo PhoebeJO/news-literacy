@@ -17,7 +17,8 @@ cd news-demo
 
 repo 根目錄的 `render.yaml` 是 Render Blueprint：在 Render 選 **New → Blueprint**，連結這個 repo 即可部署。
 
-- 免費方案閒置 15 分鐘會休眠，下一次打開要等約 1 分鐘；醒來後資料庫是空的，會自動重新抓新聞（再等約 20 秒）。
+- 線上網址：<https://news-literacy-demo.onrender.com>
+- 免費方案閒置 15 分鐘會休眠。`.github/workflows/keepalive.yml` 每 10 分鐘打一次健康檢查讓它保持清醒；GitHub 的排程偶爾會延遲，萬一遇到休眠，打開要等約 1 分鐘，醒來後會自動重新抓新聞（再等約 20 秒）。
 - 資料庫在容器裡，**每次重啟或重新部署都會清空**（閱讀紀錄、儀表板數字歸零）。這是 demo 的限制，正式版要換成 Supabase。
 - 雲端沒有 Ollama，線上版跑規則版（`LLM_PROVIDER=none`）。
 - 伺服器醒著時每 3 小時自動更新新聞；「重新抓取新聞」按鈕 10 分鐘內只會生效一次。
